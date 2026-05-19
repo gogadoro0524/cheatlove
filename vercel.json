@@ -5,6 +5,9 @@
   "framework": null,
   "buildCommand": null,
   "outputDirectory": null,
+  "rewrites": [
+    { "source": "/create-checkout-session", "destination": "/api/create-checkout-session" }
+  ],
   "headers": [
     {
       "source": "/(.*)",

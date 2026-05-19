@@ -1,7 +1,5 @@
-# Server-side bits (Stripe Express stub — wire later as /api routes)
+# Local-only Express server (Vercel uses /api/*.js instead)
 server.js
-package.json
-package-lock.json
 node_modules
 README.md
 
