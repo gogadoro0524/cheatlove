@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" width="360" height="80" role="img" aria-label="Match confidence: 94 percent">
+  <defs>
+    <linearGradient id="confGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#E1502E"/>
+      <stop offset="100%" stop-color="#C73E1D"/>
+    </linearGradient>
+  </defs>
+  <text x="0" y="20" font-family="-apple-system, system-ui, sans-serif" font-size="12" font-weight="600" fill="#5b3a30" letter-spacing="1">MATCH CONFIDENCE</text>
+  <text x="320" y="20" font-family="-apple-system, system-ui, sans-serif" font-size="20" font-weight="800" fill="#1a1208" text-anchor="end">94%</text>
+  <rect x="0" y="32" width="360" height="14" rx="7" fill="#f0e3d8"/>
+  <rect x="0" y="32" width="338" height="14" rx="7" fill="url(#confGrad)"/>
+  <g font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#7a5a4d">
+    <text x="0" y="68">Photo similarity</text>
+    <text x="120" y="68">· Bio pattern</text>
+    <text x="222" y="68">· Location match</text>
+  </g>
+</svg>

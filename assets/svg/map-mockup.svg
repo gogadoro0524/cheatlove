@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" width="480" height="360" role="img" aria-label="Map with red pin and radar pulse">
+  <defs>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f3ece6"/>
+      <stop offset="100%" stop-color="#e6d9cf"/>
+    </linearGradient>
+    <radialGradient id="radar" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(199,62,29,0.55)"/>
+      <stop offset="55%" stop-color="rgba(199,62,29,0.18)"/>
+      <stop offset="100%" stop-color="rgba(199,62,29,0)"/>
+    </radialGradient>
+    <filter id="pinShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="4" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Base -->
+  <rect width="480" height="360" fill="url(#mapBg)"/>
+
+  <!-- Map blocks -->
+  <g fill="#ddc9bb" opacity="0.85">
+    <rect x="20" y="30" width="120" height="70" rx="4"/>
+    <rect x="160" y="20" width="90" height="50" rx="4"/>
+    <rect x="270" y="40" width="100" height="80" rx="4"/>
+    <rect x="390" y="30" width="70" height="90" rx="4"/>
+    <rect x="30" y="130" width="80" height="100" rx="4"/>
+    <rect x="130" y="120" width="110" height="60" rx="4"/>
+    <rect x="260" y="150" width="90" height="80" rx="4"/>
+    <rect x="370" y="140" width="90" height="70" rx="4"/>
+    <rect x="40" y="260" width="100" height="80" rx="4"/>
+    <rect x="160" y="220" width="90" height="120" rx="4"/>
+    <rect x="270" y="260" width="80" height="80" rx="4"/>
+    <rect x="370" y="240" width="90" height="100" rx="4"/>
+  </g>
+
+  <!-- Roads -->
+  <g stroke="#fff" stroke-width="6" stroke-linecap="round" opacity="0.95">
+    <line x1="0" y1="110" x2="480" y2="110"/>
+    <line x1="0" y1="240" x2="480" y2="240"/>
+    <line x1="150" y1="0" x2="150" y2="360"/>
+    <line x1="360" y1="0" x2="360" y2="360"/>
+  </g>
+  <g stroke="#f6efe9" stroke-width="2" stroke-dasharray="3 6" opacity="0.85">
+    <line x1="0" y1="110" x2="480" y2="110"/>
+    <line x1="0" y1="240" x2="480" y2="240"/>
+    <line x1="150" y1="0" x2="150" y2="360"/>
+    <line x1="360" y1="0" x2="360" y2="360"/>
+  </g>
+
+  <!-- Water -->
+  <path d="M0 320 Q120 290 240 320 T480 318 L480 360 L0 360 Z" fill="#bcd2d8" opacity="0.7"/>
+
+  <!-- Radar pulse -->
+  <g transform="translate(240,180)">
+    <circle r="130" fill="url(#radar)"/>
+    <circle r="60" fill="none" stroke="#C73E1D" stroke-width="1.2" opacity="0.55"/>
+    <circle r="95" fill="none" stroke="#C73E1D" stroke-width="1" opacity="0.4"/>
+    <circle r="128" fill="none" stroke="#C73E1D" stroke-width="0.8" opacity="0.3"/>
+  </g>
+
+  <!-- Pin -->
+  <g transform="translate(240,180)" filter="url(#pinShadow)">
+    <path d="M0 -34 C16 -34 28 -22 28 -6 C28 12 4 32 0 38 C-4 32 -28 12 -28 -6 C-28 -22 -16 -34 0 -34 Z" fill="#C73E1D"/>
+    <circle cx="0" cy="-8" r="9" fill="#fff"/>
+  </g>
+
+  <!-- Distance label -->
+  <g transform="translate(266,176)">
+    <rect x="0" y="0" width="118" height="32" rx="16" fill="#1a1208"/>
+    <circle cx="14" cy="16" r="4" fill="#C73E1D"/>
+    <text x="26" y="20" font-family="-apple-system, system-ui, sans-serif" font-size="12" font-weight="700" fill="#fff">0.8 mi · active</text>
+  </g>
+</svg>

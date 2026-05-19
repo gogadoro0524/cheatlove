@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 340" width="380" height="340" role="img" aria-label="iOS push notification stack from CheatLove">
+  <defs>
+    <filter id="notifShadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
+      <feOffset dx="0" dy="6" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="appIcon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E1502E"/>
+      <stop offset="100%" stop-color="#A82F11"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card 1 (back) -->
+  <g transform="translate(20,8)" filter="url(#notifShadow)" opacity="0.92">
+    <rect x="0" y="0" width="340" height="78" rx="22" fill="rgba(245,238,232,0.82)" stroke="rgba(0,0,0,0.06)"/>
+    <rect x="14" y="14" width="38" height="38" rx="9" fill="url(#appIcon)"/>
+    <path d="M33 24 C40 24 43 30 40 36 C38 40 33 44 33 44 C33 44 28 40 26 36 C23 30 26 24 33 24 Z" fill="#fff"/>
+    <text x="64" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" font-weight="700" fill="#1a1208">CHEATLOVE</text>
+    <text x="294" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#777">5d ago</text>
+    <text x="64" y="46" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="600" fill="#1a1208">Profile last seen near Brooklyn, NY</text>
+    <text x="64" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#555">Match confidence: 94%</text>
+  </g>
+
+  <!-- Card 2 (middle) -->
+  <g transform="translate(20,108)" filter="url(#notifShadow)">
+    <rect x="0" y="0" width="340" height="78" rx="22" fill="rgba(250,245,240,0.96)" stroke="rgba(0,0,0,0.06)"/>
+    <rect x="14" y="14" width="38" height="38" rx="9" fill="url(#appIcon)"/>
+    <path d="M33 24 C40 24 43 30 40 36 C38 40 33 44 33 44 C33 44 28 40 26 36 C23 30 26 24 33 24 Z" fill="#fff"/>
+    <text x="64" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" font-weight="700" fill="#1a1208">CHEATLOVE</text>
+    <text x="294" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#777">3d ago</text>
+    <text x="64" y="46" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="600" fill="#1a1208">New bio change detected</text>
+    <text x="64" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#555">"Just looking, not serious" added today</text>
+  </g>
+
+  <!-- Card 3 (front, brightest) -->
+  <g transform="translate(20,208)" filter="url(#notifShadow)">
+    <rect x="0" y="0" width="340" height="78" rx="22" fill="#ffffff" stroke="rgba(0,0,0,0.08)"/>
+    <rect x="14" y="14" width="38" height="38" rx="9" fill="url(#appIcon)"/>
+    <path d="M33 24 C40 24 43 30 40 36 C38 40 33 44 33 44 C33 44 28 40 26 36 C23 30 26 24 33 24 Z" fill="#fff"/>
+    <text x="64" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" font-weight="700" fill="#1a1208">CHEATLOVE</text>
+    <text x="296" y="28" font-family="-apple-system, system-ui, sans-serif" font-size="11" fill="#C73E1D" font-weight="700">now</text>
+    <text x="64" y="46" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="700" fill="#1a1208">Active profile found</text>
+    <text x="64" y="62" font-family="-apple-system, system-ui, sans-serif" font-size="12" fill="#555">Tinder · Last online 3 min ago · 0.8 mi</text>
+  </g>
+
+  <!-- Pulse dot -->
+  <circle cx="36" cy="216" r="6" fill="#C73E1D">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+</svg>

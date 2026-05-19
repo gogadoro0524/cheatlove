@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 60" width="720" height="60" role="img" aria-label="Supported dating apps: Tinder, Hinge, Bumble, Match">
+  <g font-family="Helvetica, Arial, sans-serif" fill="#1a1208" opacity="0.78">
+    <g transform="translate(0,18)">
+      <path d="M22 4 C30 4 36 12 32 22 C30 28 24 36 22 40 C20 36 14 28 12 22 C8 12 14 4 22 4 Z" fill="#1a1208"/>
+      <text x="50" y="30" font-size="24" font-weight="800" letter-spacing="-0.5">tinder</text>
+    </g>
+    <text x="170" y="48" font-size="26" font-weight="800" letter-spacing="-0.5" font-style="italic">Hinge</text>
+    <g transform="translate(290,18)">
+      <path d="M14 4 L26 4 L32 14 L26 24 L14 24 L8 14 Z" fill="#1a1208"/>
+      <text x="42" y="30" font-size="24" font-weight="800" letter-spacing="-0.5">Bumble</text>
+    </g>
+    <text x="470" y="48" font-size="26" font-weight="800" letter-spacing="-0.5">Match</text>
+    <text x="580" y="48" font-size="26" font-weight="800" letter-spacing="-0.5">OkCupid</text>
+  </g>
+</svg>

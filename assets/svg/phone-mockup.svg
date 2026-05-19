@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 640" width="320" height="640" role="img" aria-label="Dating app profile mockup">
+  <defs>
+    <linearGradient id="phoneBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+    <linearGradient id="cardImg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a2a25"/>
+      <stop offset="50%" stop-color="#6b4a3f"/>
+      <stop offset="100%" stop-color="#1f1410"/>
+    </linearGradient>
+    <linearGradient id="cardOverlay" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="55%" stop-color="rgba(0,0,0,0)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.85)"/>
+    </linearGradient>
+    <linearGradient id="silhouette" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8a6b5e"/>
+      <stop offset="100%" stop-color="#4a342d"/>
+    </linearGradient>
+    <filter id="phoneShadow" x="-20%" y="-10%" width="140%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12"/>
+      <feOffset dx="0" dy="14" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Phone body -->
+  <rect x="6" y="6" width="308" height="628" rx="44" ry="44" fill="url(#phoneBg)" filter="url(#phoneShadow)"/>
+  <rect x="14" y="14" width="292" height="612" rx="36" ry="36" fill="#f8f2ec"/>
+
+  <!-- Status bar -->
+  <text x="38" y="42" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="600" fill="#222">9:41</text>
+  <g transform="translate(252,30)" fill="#222">
+    <rect x="0" y="4" width="4" height="8" rx="1"/>
+    <rect x="6" y="2" width="4" height="10" rx="1"/>
+    <rect x="12" y="0" width="4" height="12" rx="1"/>
+    <circle cx="26" cy="6" r="5" fill="none" stroke="#222" stroke-width="1.2"/>
+    <rect x="36" y="2" width="18" height="10" rx="2" fill="none" stroke="#222" stroke-width="1.2"/>
+    <rect x="38" y="4" width="13" height="6" rx="1"/>
+  </g>
+
+  <!-- Notch -->
+  <rect x="118" y="18" width="84" height="24" rx="12" fill="#0d0d0d"/>
+
+  <!-- Top app bar -->
+  <text x="28" y="78" font-family="-apple-system, system-ui, sans-serif" font-size="11" letter-spacing="2" font-weight="700" fill="#C73E1D">CHEATLOVE</text>
+  <circle cx="280" cy="74" r="10" fill="none" stroke="#222" stroke-width="1.4"/>
+  <path d="M276 74 L284 74 M280 70 L280 78" stroke="#222" stroke-width="1.4" stroke-linecap="round"/>
+
+  <!-- Profile card -->
+  <rect x="28" y="98" width="264" height="430" rx="20" fill="url(#cardImg)"/>
+  <!-- Silhouette portrait -->
+  <circle cx="160" cy="240" r="58" fill="url(#silhouette)"/>
+  <path d="M88 360 Q88 300 160 300 Q232 300 232 360 L232 420 L88 420 Z" fill="url(#silhouette)"/>
+  <!-- Vignette overlay -->
+  <rect x="28" y="98" width="264" height="430" rx="20" fill="url(#cardOverlay)"/>
+
+  <!-- "Active profile found" sticker -->
+  <g transform="translate(28,116) rotate(-4)">
+    <rect x="0" y="0" width="178" height="34" rx="6" fill="#F5C518"/>
+    <text x="14" y="22" font-family="-apple-system, system-ui, sans-serif" font-size="13" font-weight="800" fill="#1a1208">ACTIVE PROFILE FOUND</text>
+  </g>
+
+  <!-- Name / age -->
+  <text x="48" y="476" font-family="-apple-system, system-ui, sans-serif" font-size="26" font-weight="800" fill="#ffffff">Alex, 32</text>
+  <text x="48" y="498" font-family="-apple-system, system-ui, sans-serif" font-size="13" fill="#f5d5cd" opacity="0.92">Active 3 min ago · 0.8 mi away</text>
+
+  <!-- Tag row -->
+  <g font-family="-apple-system, system-ui, sans-serif" font-size="10" font-weight="600" fill="#ffffff">
+    <rect x="48" y="510" width="46" height="20" rx="10" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.35)"/>
+    <text x="56" y="524">Tinder</text>
+    <rect x="100" y="510" width="58" height="20" rx="10" fill="rgba(199,62,29,0.85)"/>
+    <text x="109" y="524">Verified</text>
+  </g>
+
+  <!-- Action buttons row -->
+  <g transform="translate(0,548)">
+    <circle cx="92" cy="22" r="22" fill="#fff" stroke="#e8d9d3"/>
+    <path d="M82 22 L102 22 M92 12 L92 32" stroke="#999" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="160" cy="22" r="26" fill="#C73E1D"/>
+    <path d="M160 32 C146 22 146 12 154 12 C158 12 160 14 160 16 C160 14 162 12 166 12 C174 12 174 22 160 32 Z" fill="#fff"/>
+    <circle cx="228" cy="22" r="22" fill="#fff" stroke="#e8d9d3"/>
+    <path d="M220 22 L236 22" stroke="#C73E1D" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M225 17 L220 22 L225 27 M231 17 L236 22 L231 27" stroke="#C73E1D" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Home indicator -->
+  <rect x="120" y="606" width="80" height="4" rx="2" fill="#222"/>
+</svg>
