@@ -3,10 +3,16 @@ _orig/
 
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+next-env.d.ts.bak
 
 # Build / framework caches
 .vercel/
-.next/
 dist/
 build/
 
@@ -30,4 +36,7 @@ Thumbs.db
 # Claude Code preview infra (local-only)
 .claude/preview-server.js
 .claude/launch.json
-.vercel
+
+# Pre-Next.js artifacts (kept locally as reference; not pushed)
+api/create-checkout-session.js
+server.js
