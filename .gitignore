@@ -30,3 +30,4 @@ Thumbs.db
 # Claude Code preview infra (local-only)
 .claude/preview-server.js
 .claude/launch.json
+.vercel
