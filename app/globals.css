@@ -101,6 +101,48 @@ button { font-family: inherit; }
   font-weight: 500;
 }
 .nav-links a:hover { color: #fff; }
+.nav-auth { display: inline-flex; align-items: center; gap: 10px; }
+.nav-user {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-logout {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+}
+.nav-logout:hover { color: #fff; }
+
+/* Mobile hamburger — hidden on desktop, shown < 960px via the media query */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 42px;
+  height: 38px;
+  padding: 0 10px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.nav-toggle span {
+  display: block;
+  height: 2px;
+  border-radius: 2px;
+  background: #fff;
+}
+
 .lang {
   appearance: none;
   -webkit-appearance: none;
@@ -1310,7 +1352,33 @@ section { padding: 64px 0; }
   }
   .stats { grid-template-columns: 1fr; }
   .foot-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
-  .nav-links { display: none; }
+
+  /* Collapse the nav into a hamburger dropdown */
+  .nav { position: relative; }
+  .nav-toggle { display: inline-flex; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    margin: 0;
+    padding: 10px 28px 18px;
+    background: #0e0e15;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+    z-index: 60;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links li { width: 100%; }
+  .nav-links a,
+  .nav-links .nav-logout { display: block; padding: 11px 2px; font-size: 15.5px; }
+  .nav-auth { width: 100%; justify-content: space-between; padding: 6px 0; }
+  .nav-links .lang { margin-top: 8px; }
+
   section { padding: 48px 0; }
   .cta-band { padding: 44px 28px; }
   .start-wrap { padding: 28px; }

@@ -23,8 +23,7 @@ function adminEmailAllowlist(): string[] {
 // A user is an admin if their secure app_metadata.role is "admin"
 // (set via the Supabase dashboard / admin API) OR their email is in the
 // ADMIN_EMAILS allowlist env var (comma-separated). Both are server-side only.
-export async function isAdmin(): Promise<boolean> {
-  const user = await getCurrentUser();
+export function isAdminUser(user: User | null): boolean {
   if (!user) return false;
 
   const role = (user.app_metadata as { role?: string } | undefined)?.role;
@@ -32,4 +31,8 @@ export async function isAdmin(): Promise<boolean> {
 
   const email = user.email?.toLowerCase();
   return Boolean(email && adminEmailAllowlist().includes(email));
+}
+
+export async function isAdmin(): Promise<boolean> {
+  return isAdminUser(await getCurrentUser());
 }
