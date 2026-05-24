@@ -1,12 +1,15 @@
 import Link from 'next/link';
+import { BrandMark } from './BrandMark';
+import { isAdmin } from '@/lib/auth';
 
-export function Nav({ pricingActive = false }: { pricingActive?: boolean }) {
+export async function Nav({ pricingActive = false }: { pricingActive?: boolean }) {
+  const admin = await isAdmin();
   return (
     <header className="nav">
       <div className="container nav-inner">
         <Link href="/" className="brand">
-          <span className="brand-mark" />
-          <span>CheatLove</span>
+          <BrandMark />
+          <span>CheatLens</span>
         </Link>
         <nav>
           <ul className="nav-links">
@@ -14,6 +17,8 @@ export function Nav({ pricingActive = false }: { pricingActive?: boolean }) {
             <li><Link href="/#what">What you get</Link></li>
             <li><Link href="/#reviews">Reviews</Link></li>
             <li><Link href="/#faq">FAQ</Link></li>
+            {admin && <li><Link href="/scan-demo">Scan demo</Link></li>}
+            {admin && <li><Link href="/report-demo">Sample report</Link></li>}
             <li>
               <Link
                 href="/pricing"

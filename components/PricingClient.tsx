@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import { PLAN_LIST, PLANS, type PlanId } from '@/lib/plans';
+import { RenewalModal } from '@/components/RenewalModal';
 
 const POPULAR_PLAN: PlanId = 'full-report';
 
@@ -24,33 +25,32 @@ export function PricingClient() {
   const [country, setCountry] = useState('United States');
   const [zip, setZip] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showRenewal, setShowRenewal] = useState(false);
 
   const plan = PLANS[selected];
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+  // Payment is mocked while the service is being renewed: the checkout behaves
+  // like a real charge (validation + processing spinner) but never hits the
+  // payment provider — it surfaces the renewal notice instead.
+  //
+  // We DO record the attempt (plan + delivery email only — never card data) so
+  // we can measure purchase intent. Fire-and-forget: never block the UX.
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
-    try {
-      const res = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: selected, email: email.trim() }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `HTTP ${res.status}`);
-      }
-      const { url } = await res.json();
-      if (!url) throw new Error('No checkout URL returned.');
-      window.location.href = url;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      alert(
-        'Payment could not start: ' + msg +
-        '\n\nMake sure STRIPE_SECRET_KEY is set on the server. See README.md.',
-      );
+
+    fetch('/api/record-attempt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: selected, email: email.trim() }),
+    }).catch(() => {
+      /* recording is best-effort; the renewal notice shows regardless */
+    });
+
+    setTimeout(() => {
       setSubmitting(false);
-    }
+      setShowRenewal(true);
+    }, 1700);
   }
 
   return (
@@ -180,12 +180,16 @@ export function PricingClient() {
                   style={{ marginTop: 8 }}
                   disabled={submitting}
                 >
-                  {submitting ? 'Redirecting to Stripe…' : <>🔒 Pay {plan.displayPrice} securely</>}
+                  {submitting ? (
+                    <><span className="btn-spinner" aria-hidden /> Processing payment…</>
+                  ) : (
+                    <>🔒 Pay {plan.displayPrice} securely</>
+                  )}
                 </button>
 
                 <p style={{ fontSize: 12, color: 'var(--ink-mute)', textAlign: 'center', margin: '14px 0 0' }}>
                   By clicking Pay you agree to the <a href="#">Terms</a> and <a href="#">Refund Policy</a>.
-                  Charge appears on your statement as <strong>CHEATLOVE*REPORT</strong>.
+                  Charge appears on your statement as <strong>CHEATLENS*REPORT</strong>.
                 </p>
               </form>
             </div>
@@ -209,7 +213,7 @@ export function PricingClient() {
                 </div>
 
                 <p style={{ fontSize: 13, color: 'var(--ink-soft)', margin: '18px 0 0' }}>
-                  Need help? <a href="#">support@cheatlove.example</a><br />
+                  Need help? <a href="#">support@cheatlens.example</a><br />
                   Live chat 24/7 · Avg response 4 min.
                 </p>
               </div>
@@ -224,10 +228,16 @@ export function PricingClient() {
           <div className="section-head">
             <div className="section-eyebrow">Money-back promise</div>
             <h2 className="section-title">If we don't find them, you don't pay.</h2>
-            <p className="section-sub">If CheatLove returns no active profile across all supported platforms, we refund 100% of your purchase within 24 hours. No forms, no hold music.</p>
+            <p className="section-sub">If CheatLens returns no active profile across all supported platforms, we refund 100% of your purchase within 24 hours. No forms, no hold music.</p>
           </div>
         </div>
       </section>
+
+      <RenewalModal
+        open={showRenewal}
+        email={email.trim()}
+        onClose={() => setShowRenewal(false)}
+      />
     </>
   );
 }

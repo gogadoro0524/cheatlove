@@ -2,9 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import { StartFlow } from '@/components/StartFlow';
 
 export const metadata: Metadata = {
-  title: 'CheatLove — Start your free search',
+  title: 'CheatLens — Start your free search',
   description:
-    "Answer a few questions. CheatLove will scan in real time and surface what it finds — pay only if you want the full report.",
+    "Answer a few questions. CheatLens will scan in real time and surface what it finds — pay only if you want the full report.",
 };
 
 export const viewport: Viewport = {

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="Plenty of Fish">
+  <rect width="96" height="96" rx="22" fill="#0B9CE0"/>
+  <g fill="#ffffff">
+    <path d="M30 48 C30 38 40 32 50 32 C60 32 68 39 70 48 C68 57 60 64 50 64 C40 64 30 58 30 48 Z"/>
+    <path d="M66 48 L80 38 L80 58 Z"/>
+  </g>
+  <circle cx="41" cy="44" r="3.2" fill="#0B9CE0"/>
+</svg>

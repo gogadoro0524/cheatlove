@@ -59,6 +59,19 @@ All press logos are simple SVG wordmarks in `#1a1208` for the "As seen in" trust
 - **Dimensions:** 720 × 60
 - **License:** Wordmarks only (typography). Treat as editorial reference.
 
+### App icon tiles (`/assets/logos/apps/`)
+- **Purpose:** Uniform brand-colored "app icon" tiles for a *"We scan these platforms"* grid/row. Each is a `96 × 96` rounded-square (`rx=22`) in the platform's signature brand color with a centered white/contrasting glyph. Drop several into a flex row at any size (`height: 44–64px` works well).
+- **Set (12):** `tinder` · `hinge` · `bumble` · `happn` · `badoo` · `fruitz` · `meetic` · `okcupid` · `grindr` · `pof` (Plenty of Fish) · `match` · `feeld`
+- **Source:** Hand-authored, original simplified marks (flame, hexagon, pin, heart, cherries, fish, mask, etc.) on the real brand color. `tinder`, `badoo`, and `okcupid` glyph paths are the open-source [simple-icons](https://simpleicons.org) marks (CC0); all other glyphs are original.
+- **License:** Original simplified icons recolored on brand-color tiles — not the registered logo files. Use as editorial "supported platforms" reference only; do not imply partnership or endorsement.
+- **Wiring:**
+  ```html
+  <img src="/assets/logos/apps/tinder.svg" alt="Tinder" width="48" height="48">
+  <img src="/assets/logos/apps/bumble.svg" alt="Bumble" width="48" height="48">
+  <!-- …etc -->
+  ```
+- **More platforms available on request:** Coffee Meets Bagel, Raya, The League, eHarmony, Tantan, Lovoo, Her, Pairs, Inner Circle.
+
 ---
 
 ## Human Photos (Unsplash — direct CDN, no download)

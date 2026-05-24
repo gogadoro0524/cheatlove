@@ -2,17 +2,18 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { BrandMark } from './BrandMark';
+import { ScanScreen } from './ScanScreen';
 
-const SCAN_LOGS = [
-  'Initializing secure tunnel…',
-  'Connecting to dating servers…',
-  'Indexing nearby profiles…',
-  'Cross-referencing photo hashes…',
-  'Checking last-seen timestamps…',
-  'Reading subscription tier…',
-  'Verifying account activity…',
-  'Compiling encrypted report…',
-];
+const MAX_PHOTOS = 4;
+// Estimated scan accuracy by number of photos added (index = photo count).
+const ACCURACY_BY_COUNT = [0, 88, 93, 96, 99] as const;
+
+interface PhotoItem {
+  name: string;
+  sizeKb: number;
+  url: string;
+}
 
 type Gender = 'man' | 'woman';
 
@@ -26,62 +27,71 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [city, setCity] = useState('');
-  const [photoName, setPhotoName] = useState<string | null>(null);
-  const [photoSizeKb, setPhotoSizeKb] = useState<number | null>(null);
-
-  const [scanProgress, setScanProgress] = useState(0);
-  const [scanLogIdx, setScanLogIdx] = useState(0);
-  const [scanDone, setScanDone] = useState(false);
-  const scanStartedRef = useRef(false);
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
 
   const nameRef = useRef<HTMLInputElement>(null);
   const ageRef = useRef<HTMLInputElement>(null);
   const cityRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
-  const gender = initialGender;
+  // Keep a live ref to revoke object URLs on unmount (avoids memory leaks).
+  const photosRef = useRef<PhotoItem[]>([]);
+  photosRef.current = photos;
+  useEffect(() => () => photosRef.current.forEach((p) => URL.revokeObjectURL(p.url)), []);
+
+  const [gender, setGender] = useState<Gender>(initialGender);
+
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const [cityOpen, setCityOpen] = useState(false);
+  const [cityActiveIdx, setCityActiveIdx] = useState(-1);
+  const cityDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cityAbortRef = useRef<AbortController | null>(null);
+
   const subjectLabel = gender === 'woman' ? 'her' : 'him';
+  const possessive = gender === 'woman' ? 'her' : 'his';
   const subject = gender === 'woman' ? 'she' : 'he';
   const displayName = name || subjectLabel;
   const initial = (name || subjectLabel).slice(0, 1).toUpperCase();
 
   // Focus the first input on each input step
   useEffect(() => {
-    if (step === 0) nameRef.current?.focus({ preventScroll: true });
-    if (step === 1) ageRef.current?.focus({ preventScroll: true });
-    if (step === 2) cityRef.current?.focus({ preventScroll: true });
-  }, [step]);
-
-  // Scan animation effect — runs once when scan step is reached
-  useEffect(() => {
-    if (step !== 4 || scanStartedRef.current) return;
-    scanStartedRef.current = true;
-    let p = 0;
-    let i = 0;
-    const tick = setInterval(() => {
-      p = Math.min(100, p + Math.random() * 9 + 3);
-      setScanProgress(p);
-      setScanLogIdx(i % SCAN_LOGS.length);
-      i++;
-      if (p >= 100) {
-        clearInterval(tick);
-        setScanDone(true);
-      }
-    }, 520);
-    return () => clearInterval(tick);
+    if (step === 1) nameRef.current?.focus({ preventScroll: true });
+    if (step === 2) ageRef.current?.focus({ preventScroll: true });
+    if (step === 3) cityRef.current?.focus({ preventScroll: true });
   }, [step]);
 
   const stepValid = useMemo(() => {
-    if (step === 0) return name.trim().length >= 1;
-    if (step === 1) {
+    if (step === 1) return name.trim().length >= 1;
+    if (step === 2) {
       const v = parseInt(age, 10);
       return Number.isFinite(v) && v >= 18 && v <= 99;
     }
-    if (step === 2) return city.trim().length >= 2;
+    if (step === 3) return city.trim().length >= 2;
+    if (step === 4) return photos.length >= 1;
     return true;
-  }, [step, name, age, city]);
+  }, [step, name, age, city, photos]);
 
   function onNext() {
-    if (step < 4) setStep(step + 1);
+    if (step < 5) setStep(step + 1);
+  }
+
+  // Fired by the "Run search" button: records the typed search criteria
+  // (never the photos) before advancing to the scan screen. Best-effort —
+  // a failed record must not block the scan.
+  function runSearch() {
+    void fetch('/api/record-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        gender,
+        name: name.trim(),
+        age: age.trim(),
+        city: city.trim(),
+        photoCount: photos.length,
+        paid,
+      }),
+    }).catch(() => {});
+    onNext();
   }
   function onBack() {
     if (step > 0) setStep(step - 1);
@@ -95,21 +105,135 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
     }
   }
 
-  function onPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (f) {
-      setPhotoName(f.name);
-      setPhotoSizeKb(Math.round(f.size / 1024));
+  // ─── City autocomplete via Photon (free OSM geocoder, no API key) ───
+  async function fetchCitySuggestions(q: string) {
+    const query = q.trim();
+    if (query.length < 2) {
+      setCitySuggestions([]);
+      setCityOpen(false);
+      return;
+    }
+    cityAbortRef.current?.abort();
+    const ctrl = new AbortController();
+    cityAbortRef.current = ctrl;
+    try {
+      const res = await fetch(
+        `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lang=en`,
+        { signal: ctrl.signal },
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      const PLACE_TYPES = new Set(['city', 'town', 'village', 'locality', 'district', 'county', 'state', 'region']);
+      const seen = new Set<string>();
+      const labels: string[] = [];
+      for (const f of data.features ?? []) {
+        const p = f.properties ?? {};
+        if (p.osm_key !== 'place' && !PLACE_TYPES.has(p.type)) continue;
+        const parts = [p.name, p.state, p.country].filter(Boolean) as string[];
+        const label = parts.filter((v, i) => i === 0 || v !== parts[i - 1]).join(', ');
+        if (label && !seen.has(label)) {
+          seen.add(label);
+          labels.push(label);
+        }
+      }
+      setCitySuggestions(labels);
+      setCityActiveIdx(-1);
+      setCityOpen(labels.length > 0);
+    } catch {
+      /* aborted or offline — keep current suggestions */
     }
   }
 
-  // Segment classes for the 4-segment progress bar
+  function onCityChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const v = e.target.value;
+    setCity(v);
+    if (cityDebounceRef.current) clearTimeout(cityDebounceRef.current);
+    cityDebounceRef.current = setTimeout(() => fetchCitySuggestions(v), 250);
+  }
+
+  function selectCity(label: string) {
+    setCity(label);
+    setCitySuggestions([]);
+    setCityOpen(false);
+    setCityActiveIdx(-1);
+  }
+
+  function onCityKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (cityOpen && citySuggestions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setCityActiveIdx((i) => (i + 1) % citySuggestions.length);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setCityActiveIdx((i) => (i - 1 + citySuggestions.length) % citySuggestions.length);
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        selectCity(citySuggestions[cityActiveIdx >= 0 ? cityActiveIdx : 0]);
+        return;
+      }
+      if (e.key === 'Escape') {
+        setCityOpen(false);
+        return;
+      }
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (stepValid) onNext();
+    }
+  }
+
+  useEffect(() => () => {
+    if (cityDebounceRef.current) clearTimeout(cityDebounceRef.current);
+    cityAbortRef.current?.abort();
+  }, []);
+
+  function onPhotosSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    setPhotos((prev) => {
+      const room = MAX_PHOTOS - prev.length;
+      const added = files.slice(0, room).map((f) => ({
+        name: f.name,
+        sizeKb: Math.round(f.size / 1024),
+        url: URL.createObjectURL(f),
+      }));
+      return [...prev, ...added];
+    });
+    e.target.value = ''; // allow re-picking the same file
+  }
+
+  function removePhoto(idx: number) {
+    setPhotos((prev) => {
+      const removed = prev[idx];
+      if (removed) URL.revokeObjectURL(removed.url);
+      return prev.filter((_, i) => i !== idx);
+    });
+  }
+
+  // Segment classes for the 5-segment progress bar (gender, name, age, city, photo)
   const segClass = (idx: number) => {
-    if (step >= 4) return 'seg done';
+    if (step >= 5) return 'seg done';
     if (idx === step) return 'seg active';
     if (idx < step) return 'seg done';
     return 'seg';
   };
+
+  // The scan step takes over full-screen with the shared "similarity analysis"
+  // screen, fed the user's uploaded photos.
+  if (step === 5) {
+    return (
+      <ScanScreen
+        photos={photos.map((p) => p.url)}
+        name={name}
+        age={age}
+        city={city}
+      />
+    );
+  }
 
   return (
     <main className="ce-app">
@@ -122,17 +246,14 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
             />
           </svg>
         </button>
-        <Link href="/" className="ce-logo" aria-label="CheatLove home">
-          <svg viewBox="0 0 36 24" width="28" height="20" aria-hidden>
-            <ellipse cx="18" cy="12" rx="17" ry="11" fill="none" stroke="#000" strokeWidth="2.4" />
-            <circle cx="18" cy="12" r="5.5" fill="#000" />
-          </svg>
-          <span className="ce-wordmark">CHEATLOVE</span>
+        <Link href="/" className="ce-logo" aria-label="CheatLens home">
+          <BrandMark className="ce-mark" size={26} />
+          <span className="ce-wordmark">CHEATLENS</span>
         </Link>
       </div>
 
       <div className="ce-progress" aria-label="Progress">
-        {[0, 1, 2, 3].map((i) => <div key={i} className={segClass(i)} />)}
+        {[0, 1, 2, 3, 4].map((i) => <div key={i} className={segClass(i)} />)}
       </div>
 
       {paid && (
@@ -145,7 +266,41 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
 
         {step === 0 && (
           <section className="ce-step active">
-            <h2 className="ce-q">What is {subjectLabel} name?</h2>
+            <h2 className="ce-q">Who are you searching for?</h2>
+            <p className="ce-help">Pick the gender of the person you want to scan for.</p>
+
+            <div className="ce-gender" role="group" aria-label="Gender">
+              <button
+                type="button"
+                className={`ce-gender-card${gender === 'man' ? ' selected' : ''}`}
+                aria-pressed={gender === 'man'}
+                onClick={() => setGender('man')}
+              >
+                <strong>Male</strong>
+              </button>
+              <button
+                type="button"
+                className={`ce-gender-card${gender === 'woman' ? ' selected' : ''}`}
+                aria-pressed={gender === 'woman'}
+                onClick={() => setGender('woman')}
+              >
+                <strong>Female</strong>
+              </button>
+            </div>
+
+            <button type="button" className="ce-next" onClick={onNext}>
+              <span>Next</span>
+              <ArrowIcon />
+            </button>
+            <p className="ce-stat">
+              <span className="hl">140k+</span> searches completed across 38 countries
+            </p>
+          </section>
+        )}
+
+        {step === 1 && (
+          <section className="ce-step active">
+            <h2 className="ce-q">What is {possessive} name?</h2>
             <div className="ce-field">
               <span className="ce-pointer" aria-hidden>👉</span>
               <input
@@ -178,7 +333,7 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
           </section>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <section className="ce-step active">
             <h2 className="ce-q">How old is {displayName}?</h2>
             <div className="ce-field">
@@ -186,7 +341,7 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
               <input
                 ref={ageRef}
                 type="number"
-                placeholder={`Enter ${subjectLabel} age`}
+                placeholder={`Enter ${possessive} age`}
                 min={18}
                 max={80}
                 inputMode="numeric"
@@ -210,7 +365,7 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
           </section>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <section className="ce-step active">
             <h2 className="ce-q">Where does {subject} live?</h2>
             <div className="ce-field">
@@ -220,10 +375,32 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
                 type="text"
                 placeholder="Enter a city"
                 autoComplete="off"
+                role="combobox"
+                aria-expanded={cityOpen}
+                aria-autocomplete="list"
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
-                onKeyDown={onKeyDown}
+                onChange={onCityChange}
+                onKeyDown={onCityKeyDown}
+                onFocus={() => citySuggestions.length > 0 && setCityOpen(true)}
+                onBlur={() => window.setTimeout(() => setCityOpen(false), 120)}
               />
+              {cityOpen && citySuggestions.length > 0 && (
+                <ul className="ce-suggest" role="listbox">
+                  {citySuggestions.map((s, i) => (
+                    <li key={s} role="option" aria-selected={i === cityActiveIdx}>
+                      <button
+                        type="button"
+                        className={`ce-suggest-item${i === cityActiveIdx ? ' active' : ''}`}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => selectCity(s)}
+                      >
+                        <PinIcon />
+                        <span>{s}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <p className="ce-help">We'll scan a 50&nbsp;km radius around the city you enter.</p>
 
@@ -245,76 +422,84 @@ export function StartFlow({ initialGender = 'man', paid = false }: Props) {
           </section>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <section className="ce-step active">
-            <h2 className="ce-q">Have a photo of {displayName}?</h2>
-
-            <label htmlFor="ce-photo" className={`ce-drop${photoName ? ' has-file' : ''}`}>
-              <div className="ce-drop-icon">📷</div>
-              <strong>{photoName ?? 'Tap to add a photo'}</strong>
-              <span>
-                {photoSizeKb != null ? `${photoSizeKb} KB · ready` : 'JPG or PNG · up to 8 MB'}
-              </span>
-              <input type="file" id="ce-photo" accept="image/*" hidden onChange={onPhotoChange} />
-            </label>
+            <h2 className="ce-q">Add photos of {displayName}</h2>
             <p className="ce-help">
-              Adding a photo lifts accuracy from <strong>88%</strong> → <strong>99%</strong>.
-              Photos are hashed locally and never leave your device.
+              Add <strong>1–4 photos</strong>. The more photos you add, the higher the scan
+              accuracy — our AI cross-matches every angle. Photos are never stored on our
+              servers and are used only for this search.
             </p>
 
-            <button type="button" className="ce-next" onClick={onNext}>
+            <div className="ce-photos">
+              {photos.map((p, i) => (
+                <div className="ce-photo-slot filled" key={p.url}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.url} alt={`Photo ${i + 1} of ${displayName}`} />
+                  <button
+                    type="button"
+                    className="ce-photo-x"
+                    onClick={() => removePhoto(i)}
+                    aria-label={`Remove photo ${i + 1}`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {photos.length < MAX_PHOTOS && (
+                <button
+                  type="button"
+                  className="ce-photo-slot add"
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  <span className="ce-photo-plus" aria-hidden>+</span>
+                  <span className="ce-photo-add-label">Add photo</span>
+                </button>
+              )}
+            </div>
+
+            {/* Visually hidden (not display:none) so programmatic .click() reliably
+                opens the picker in in-app webviews (Instagram/Facebook) & older iOS. */}
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="ce-visually-hidden"
+              tabIndex={-1}
+              aria-hidden="true"
+              onChange={onPhotosSelected}
+            />
+
+            <div className="ce-accuracy">
+              <div className="ce-accuracy-head">
+                <span>Estimated scan accuracy</span>
+                <strong>{photos.length === 0 ? '—' : `${ACCURACY_BY_COUNT[photos.length]}%`}</strong>
+              </div>
+              <div className="ce-accuracy-bar">
+                <div className="fill" style={{ width: `${ACCURACY_BY_COUNT[photos.length]}%` }} />
+              </div>
+              <p className="ce-accuracy-note">
+                {photos.length === 0
+                  ? 'Add at least 1 photo to run the search.'
+                  : photos.length < MAX_PHOTOS
+                    ? `Add ${MAX_PHOTOS - photos.length} more photo${MAX_PHOTOS - photos.length > 1 ? 's' : ''} to reach 99% accuracy.`
+                    : 'Maximum accuracy — all 4 photos added.'}
+              </p>
+            </div>
+
+            <button type="button" className="ce-next" onClick={runSearch} disabled={!stepValid}>
               <span>Run search</span>
               <ArrowIcon />
             </button>
-            <button type="button" className="ce-skip" onClick={onNext}>Skip — run without photo</button>
           </section>
         )}
 
-        {step === 4 && (
-          <section className="ce-step active">
-            <div className="ce-scan">
-              <div className="ce-eye" aria-hidden />
-              <h2 className="ce-q ce-scan-status" style={{ textAlign: 'center' }}>
-                {scanDone ? 'Match found.' : 'Scanning…'}
-              </h2>
-              <p className="ce-scan-log">
-                {scanDone ? 'Report ready. Unlock to view.' : SCAN_LOGS[scanLogIdx]}
-              </p>
-              <div className="ce-scan-bar"><div className="fill" style={{ width: `${scanProgress}%` }} /></div>
-            </div>
-
-            {scanDone && (
-              <div className="ce-result">
-                <h4>Match preview</h4>
-                <div className="ce-profile">
-                  <div className="ce-avatar">{initial}</div>
-                  <div className="ce-profile-meta">
-                    <strong>{name || 'Daniel'}{age ? `, ${age}` : ''}</strong>
-                    <span>{city || 'Brooklyn, NY'}</span> · Active 26 s ago
-                  </div>
-                  <span className="ce-tag">Match</span>
-                </div>
-                <div className="ce-row"><span>Account status</span><strong>Active (online now)</strong></div>
-                <div className="ce-row"><span>Last activity</span><strong>Today, 14:22</strong></div>
-                <div className="ce-row"><span>Subscription</span><strong>Tinder Gold</strong></div>
-                <div className="ce-row locked"><span>Bio change</span><strong>Locked</strong></div>
-                <div className="ce-row locked"><span>Photo updates</span><strong>Locked</strong></div>
-                <div className="ce-row locked"><span>Cross-platform matches</span><strong>Locked</strong></div>
-
-                <Link href="/pricing" className="ce-next" style={{ marginTop: 18, textDecoration: 'none' }}>
-                  <span>🔓 Unlock the full report</span>
-                  <ArrowIcon />
-                </Link>
-                <p className="ce-stat">From <span className="hl">$14.99</span> · refunded if no match found</p>
-              </div>
-            )}
-          </section>
-        )}
       </form>
 
       <p className="ce-fine">
         🔒 Inputs are encrypted in transit. Searches auto-delete after 30 days.
-        CheatLove never contacts, swipes, or messages the target.
+        CheatLens never contacts, swipes, or messages the target.
       </p>
     </main>
   );
@@ -330,6 +515,17 @@ function ArrowIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
+      />
+    </svg>
+  );
+}
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={18} height={18} aria-hidden>
+      <path
+        d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
+        fill="currentColor"
       />
     </svg>
   );

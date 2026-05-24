@@ -4,7 +4,7 @@ import { Footer } from '@/components/Footer';
 import { PricingClient } from '@/components/PricingClient';
 
 export const metadata: Metadata = {
-  title: 'CheatLove — Pricing',
+  title: 'CheatLens — Pricing',
   description: "One-time, transparent pricing. Unlock the full report only when you're ready.",
 };
 

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BrandMark } from './BrandMark';
 
 export function Footer() {
   return (
@@ -7,8 +8,8 @@ export function Footer() {
         <div className="foot-grid">
           <div>
             <div className="brand" style={{ color: '#fff' }}>
-              <span className="brand-mark" />
-              <span>CheatLove</span>
+              <BrandMark />
+              <span>CheatLens</span>
             </div>
             <p style={{ fontSize: 14, marginTop: 14, maxWidth: 300 }}>
               AI-powered profile discovery across major dating platforms. Private. Instant. Accurate.
@@ -43,8 +44,8 @@ export function Footer() {
           </div>
         </div>
         <div className="foot-bottom">
-          <span>© 2026 CheatLove · Operated by a delaware LLC · Wyoming, USA</span>
-          <span>support@cheatlove.example · +1 (888) 555-0142</span>
+          <span>© 2026 CheatLens · Operated by a delaware LLC · Wyoming, USA</span>
+          <span>support@cheatlens.example · +1 (888) 555-0142</span>
         </div>
       </div>
     </footer>

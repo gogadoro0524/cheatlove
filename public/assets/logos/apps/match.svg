@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="Match">
+  <rect width="96" height="96" rx="22" fill="#E8121D"/>
+  <text x="48" y="66" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="52" font-weight="700" fill="#ffffff">m</text>
+  <path d="M64 24 C66 28 70 29 70 33 C70 36 67 38 64 35 C61 38 58 36 58 33 C58 29 62 28 64 24 Z" fill="#FFD23F"/>
+</svg>

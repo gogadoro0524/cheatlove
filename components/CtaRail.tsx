@@ -1,17 +1,49 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Gender = 'man' | 'woman';
 
 const PORTRAITS: Record<Gender, string> = {
-  man: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80&auto=format&fit=crop&crop=faces',
-  woman: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80&auto=format&fit=crop&crop=faces',
+  man: '/assets/avatars/man.webp',
+  woman: '/assets/avatars/woman.webp',
 };
+
+const LABELS: Record<Gender, string> = { man: 'Male', woman: 'Female' };
+
+const BTN_PHRASES = ['Start search →', 'Get your report in 3 min'];
+
+function useTypewriter(phrases: string[]) {
+  const [text, setText] = useState('');
+  const [idx, setIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setText(phrases[0]);
+      return;
+    }
+    const current = phrases[idx];
+    let timer: ReturnType<typeof setTimeout>;
+    if (!deleting && text === current) {
+      timer = setTimeout(() => setDeleting(true), 1600);
+    } else if (deleting && text === '') {
+      setDeleting(false);
+      setIdx((i) => (i + 1) % phrases.length);
+    } else {
+      const next = deleting ? current.slice(0, text.length - 1) : current.slice(0, text.length + 1);
+      timer = setTimeout(() => setText(next), deleting ? 45 : 80);
+    }
+    return () => clearTimeout(timer);
+  }, [text, deleting, idx, phrases]);
+
+  return text;
+}
 
 export function CtaRail() {
   const [gender, setGender] = useState<Gender>('man');
+  const typed = useTypewriter(BTN_PHRASES);
 
   return (
     <aside className="layout-rail">
@@ -27,21 +59,38 @@ export function CtaRail() {
               aria-pressed={gender === g}
             >
               <div className="portrait">
+                {/* Above the fold on mobile (rail is order:-1) — load eagerly so it
+                    doesn't delay LCP. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={PORTRAITS[g]} alt="" loading="lazy" />
+                <img
+                  src={PORTRAITS[g]}
+                  alt=""
+                  width={150}
+                  height={150}
+                  decoding="async"
+                  fetchPriority="high"
+                />
               </div>
-              <span className="label">{g.toUpperCase()}</span>
+              <span className="label">{LABELS[g]}</span>
             </button>
           ))}
         </div>
 
-        <Link href={`/start?gender=${gender}`} className="btn btn-dark btn-lg btn-block">
-          Start search →
-          <small>Get your report in 3 min</small>
+        <Link
+          href={`/start?gender=${gender}`}
+          className="btn btn-dark btn-lg btn-block btn-search"
+          aria-label="Start search — get your report in 3 minutes"
+        >
+          <span className="btn-type" aria-hidden="true">
+            {typed}
+            <span className="btn-caret" />
+          </span>
+          <span className="btn-scanner" aria-hidden="true">🔍</span>
         </Link>
 
         <div className="cta-rail-meta">
-          <strong>142 people</strong> found answers today 👈
+          <strong>142 people</strong> found answers today{' '}
+          <span className="meta-lens" aria-hidden="true">🔍</span>
         </div>
 
         <div className="cta-rail-trust">

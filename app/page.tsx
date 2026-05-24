@@ -4,6 +4,7 @@ import { Footer } from '@/components/Footer';
 import { Laurel } from '@/components/Laurel';
 import { CtaRail } from '@/components/CtaRail';
 import { FaqAccordion } from '@/components/FaqAccordion';
+import { PlatformMarquee } from '@/components/PlatformMarquee';
 
 const FAQ_ITEMS = [
   {
@@ -24,7 +25,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Is this legal?',
-    a: 'CheatLove only surfaces information already publicly visible to anyone who uses the dating app. We comply with GDPR, CCPA, and US data protection laws.',
+    a: 'CheatLens only surfaces information already publicly visible to anyone who uses the dating app. We comply with GDPR, CCPA, and US data protection laws.',
   },
   {
     q: 'What if no profile is found?',
@@ -88,12 +89,15 @@ export default function HomePage() {
             </div>
           </section>
 
+          {/* PLATFORMS — auto-scrolling supported dating apps */}
+          <PlatformMarquee />
+
           {/* HOW IT WORKS */}
           <section id="how">
             <div className="section-head">
               <div className="section-eyebrow">How it works</div>
               <h2 className="section-title">Three steps. No app, no account.</h2>
-              <p className="section-sub">CheatLove does the heavy lifting — you just answer a few questions.</p>
+              <p className="section-sub">CheatLens does the heavy lifting — you just answer a few questions.</p>
             </div>
 
             <div className="steps">
@@ -148,7 +152,7 @@ export default function HomePage() {
                   ].map((n, i) => (
                     <div className="notif" key={i}>
                       <div className="notif-icon" />
-                      <div><strong>CheatLove</strong><div className="msg">{n.msg}</div></div>
+                      <div><strong>CheatLens</strong><div className="msg">{n.msg}</div></div>
                       <span className="ago">{n.ago}</span>
                     </div>
                   ))}
@@ -175,7 +179,7 @@ export default function HomePage() {
           {/* WHY */}
           <section>
             <div className="section-head">
-              <div className="section-eyebrow">Why CheatLove</div>
+              <div className="section-eyebrow">Why CheatLens</div>
               <h2 className="section-title">The fastest path from <span className="red">suspicion</span> to certainty.</h2>
             </div>
 
@@ -197,7 +201,7 @@ export default function HomePage() {
           {/* STATS */}
           <section>
             <div className="section-head">
-              <div className="section-eyebrow">CheatLove in action</div>
+              <div className="section-eyebrow">CheatLens in action</div>
               <h2 className="section-title">Trusted by 140,000+ people who needed certainty.</h2>
             </div>
             <div className="stats">
