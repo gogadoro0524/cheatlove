@@ -8,10 +8,25 @@ const inter = Inter({
   display: 'swap',
 });
 
+const description =
+  'CheatLens scans dating platforms with AI to surface active profiles, last-seen times, and subscription status. Private, instant, 99% accurate.';
+
 export const metadata: Metadata = {
+  metadataBase: new URL('https://cheatlens.com'),
   title: 'CheatLens — Find any dating profile in seconds',
-  description:
-    'CheatLens scans dating platforms with AI to surface active profiles, last-seen times, and subscription status. Private, instant, 99% accurate.',
+  description,
+  openGraph: {
+    type: 'website',
+    url: 'https://cheatlens.com',
+    siteName: 'CheatLens',
+    title: 'CheatLens — Find any dating profile in seconds',
+    description,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CheatLens — Find any dating profile in seconds',
+    description,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
